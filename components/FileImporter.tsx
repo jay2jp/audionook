@@ -24,10 +24,11 @@ export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) 
       // In a more complex app, we'd try to parse folder structures or ID3 tags.
       
       const fileList = Array.from(files) as File[];
-      const audioFiles = fileList.filter(f => f.type.startsWith('audio/') || f.name.match(/\.(mp3|m4b|aac|wav|ogg)$/i)).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+      // Expanded regex to include m4a which is common on iOS
+      const audioFiles = fileList.filter(f => f.type.startsWith('audio/') || f.name.match(/\.(mp3|m4b|m4a|aac|wav|ogg)$/i)).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
       if (audioFiles.length === 0) {
-        alert("No audio files found in selection.");
+        alert("No audio files found in selection. Please ensure you selected audio files (MP3, M4B, etc).");
         setIsProcessing(false);
         return;
       }
@@ -73,7 +74,7 @@ export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) 
       <input 
         type="file" 
         multiple 
-        accept="audio/*" 
+        accept="audio/*,.mp3,.m4b,.m4a,.aac,.wav,.ogg" 
         ref={fileInputRef} 
         onChange={handleFileSelect} 
         className="hidden" 
@@ -90,7 +91,9 @@ export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) 
       
       <h3 className="text-lg font-semibold mb-2">Add New Audiobook</h3>
       <p className="text-slate-400 text-center text-sm mb-6 max-w-xs">
-        Select multiple audio files to create a book. We support MP3, M4B, WAV.
+        Select multiple audio files to create a book. 
+        <br />
+        <span className="text-xs text-slate-500 mt-1 block">(On iPhone: Select "Choose Files" to browse iCloud/Phone storage)</span>
       </p>
       
       <Button 
