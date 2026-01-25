@@ -1,0 +1,5 @@
+{
+  "name": "AudioNook",
+  "description": "A seamless, offline-capable audiobook player that remembers where you left off. Import books, manage your library, and listen with advanced playback controls.",
+  "requestFramePermissions": []
+}
