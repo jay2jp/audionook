@@ -10,51 +10,41 @@ AudioNook is a Progressive Web App (PWA) designed for listening to audiobooks lo
 - 📱 **PWA**: Installable on iOS and Android home screens.
 - 📚 Local Library management (data stored in browser IndexedDB).
 
-## Prerequisites
+## Deployment (Free on Vercel)
 
-To run this project locally, you need:
+This project is configured to run on the **Vercel Hobby Plan** (Free).
 
-- **Node.js** (Version 16 or higher recommended)
-- **npm** (Included with Node.js)
+1.  **Push to GitHub**: Create a repository on GitHub and push this code to it.
+    *(Note: You can safely delete the `sw.js` and `manifest.json` files in the root folder, as they have been moved to the `public/` folder)*.
 
-## Installation
+2.  **Import to Vercel**:
+    *   Go to [Vercel.com](https://vercel.com) and log in.
+    *   Click **"Add New"** > **"Project"**.
+    *   Select your GitHub repository.
 
-1.  Download or clone this repository.
-2.  Open your terminal/command prompt in the project folder.
-3.  Install dependencies:
+3.  **Configure Build**:
+    *   **Framework Preset**: Vite (Vercel should detect this automatically).
+    *   **Build Command**: `npm run build`
+    *   **Output Directory**: `dist`
+    *   Click **Deploy**.
 
-    ```bash
-    npm install
-    ```
+Once deployed, open the URL on your phone. You can then use "Share" > "Add to Home Screen" to install it as an app.
 
-## Development
+## Local Development
 
-To start the local development server:
+To run this project locally:
 
 ```bash
+npm install
 npm run dev
 ```
 
-This will start the app at `http://localhost:3000`. Any changes you make to the code will automatically reload the page.
-
-## Building for Production
-
-To create a production-ready build:
-
-```bash
-npm run build
-```
-
-The output will be in the `dist` folder. You can serve this folder using any static file server.
-
-## PWA & Offline Note
-
-The Service Worker (`sw.js`) is configured to cache files for offline use. In development mode (`npm run dev`), the Service Worker might log errors or behave inconsistently because of hot-reloading. It works best when running a production build or when tested in a secure context (HTTPS or localhost).
+This will start the app at `http://localhost:3000`.
 
 ## Tech Stack
 
 - **React** (UI Framework)
 - **TypeScript** (Type safety)
-- **Tailwind CSS** (Styling - currently loaded via CDN for simplicity)
+- **Tailwind CSS** (Styling - currently loaded via CDN)
 - **Vite** (Build tool)
-- **IndexedDB** (Local database for large file storage)
+- **IndexedDB** (Local database)
