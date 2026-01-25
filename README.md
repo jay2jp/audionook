@@ -1,20 +1,60 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AudioNook - Offline Audiobook Player
 
-# Run and deploy your AI Studio app
+AudioNook is a Progressive Web App (PWA) designed for listening to audiobooks locally on your device. It features offline support, listening history tracking, and bookmarking.
 
-This contains everything you need to run your app locally.
+## Features
 
-View your app in AI Studio: https://ai.studio/apps/drive/1kxx4_rO54VWgCDmxCkU9wbTm8QB2cjfN
+- 🎧 Plays MP3, M4B, WAV files.
+- 💾 **Offline Ready**: Works without internet once installed.
+- 📍 **Auto-Resume**: Remembers exactly where you left off.
+- 📱 **PWA**: Installable on iOS and Android home screens.
+- 📚 Local Library management (data stored in browser IndexedDB).
 
-## Run Locally
+## Prerequisites
 
-**Prerequisites:**  Node.js
+To run this project locally, you need:
 
+- **Node.js** (Version 16 or higher recommended)
+- **npm** (Included with Node.js)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Installation
+
+1.  Download or clone this repository.
+2.  Open your terminal/command prompt in the project folder.
+3.  Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+## Development
+
+To start the local development server:
+
+```bash
+npm run dev
+```
+
+This will start the app at `http://localhost:3000`. Any changes you make to the code will automatically reload the page.
+
+## Building for Production
+
+To create a production-ready build:
+
+```bash
+npm run build
+```
+
+The output will be in the `dist` folder. You can serve this folder using any static file server.
+
+## PWA & Offline Note
+
+The Service Worker (`sw.js`) is configured to cache files for offline use. In development mode (`npm run dev`), the Service Worker might log errors or behave inconsistently because of hot-reloading. It works best when running a production build or when tested in a secure context (HTTPS or localhost).
+
+## Tech Stack
+
+- **React** (UI Framework)
+- **TypeScript** (Type safety)
+- **Tailwind CSS** (Styling - currently loaded via CDN for simplicity)
+- **Vite** (Build tool)
+- **IndexedDB** (Local database for large file storage)
