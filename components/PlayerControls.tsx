@@ -1,6 +1,5 @@
 import React from 'react';
 import { Play, Pause, SkipBack, SkipForward, Rewind, FastForward } from 'lucide-react';
-import { Button } from './Button';
 
 interface PlayerControlsProps {
   isPlaying: boolean;

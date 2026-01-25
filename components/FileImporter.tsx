@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Upload, FolderPlus, Loader2 } from 'lucide-react';
+import { FolderPlus, Loader2 } from 'lucide-react';
 import { db } from '../services/db';
 import { v4 as uuidv4 } from 'uuid';
 import { Book, Chapter } from '../types';

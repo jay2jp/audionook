@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Book as BookType, Chapter, PlaybackState, Bookmark } from '../types';
+import React, { useEffect, useRef, useState } from 'react';
+import { Book as BookType, Chapter, PlaybackState } from '../types';
 import { PlayerControls } from './PlayerControls';
-import { ChevronDown, List, MessageSquarePlus, Bookmark as BookmarkIcon, Book } from 'lucide-react';
+import { ChevronDown, List, Bookmark as BookmarkIcon, Book } from 'lucide-react';
 import { db } from '../services/db';
-import { Button } from './Button';
 
 interface PlayerProps {
   book: BookType;
