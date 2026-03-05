@@ -83,11 +83,12 @@ export const Player: React.FC<PlayerProps> = ({ book, chapters, initialState, on
           audioRef.current.src = url;
           audioRef.current.playbackRate = playbackRate;
           
-          // Restore time if it's the chapter we initiated with
-          if (initialState && initialState.chapterIndex === currentChapterIndex && Math.abs(initialState.currentTime - currentTime) < 1) {
+          // Set start time if defined
+          if (chapter.startTime !== undefined) {
+             audioRef.current.currentTime = chapter.startTime;
+          } else if (initialState && initialState.chapterIndex === currentChapterIndex && Math.abs(initialState.currentTime - currentTime) < 1) {
              audioRef.current.currentTime = initialState.currentTime;
           } else if (currentTime > 0) {
-             // If we switched chapters within this session, currentTime was likely set to 0 by the handler
              audioRef.current.currentTime = 0;
           }
           
@@ -111,6 +112,11 @@ export const Player: React.FC<PlayerProps> = ({ book, chapters, initialState, on
     if (!audio) return;
 
     const updateTime = () => {
+      const chapter = chapters[currentChapterIndex];
+      if (chapter?.endTime && audio.currentTime >= chapter.endTime) {
+          audio.pause();
+          handleNext();
+      }
       setCurrentTime(audio.currentTime);
     };
 

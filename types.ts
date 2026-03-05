@@ -15,6 +15,8 @@ export interface Chapter {
   title: string;
   fileName: string;
   duration?: number;
+  startTime?: number; // Start time in seconds
+  endTime?: number;   // End time in seconds
   fileBlob: Blob; // Stored in IndexedDB
 }
 

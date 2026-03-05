@@ -4,6 +4,7 @@ import { db } from '../services/db';
 import { v4 as uuidv4 } from 'uuid';
 import { Book, Chapter } from '../types';
 import { Button } from './Button';
+import * as mm from 'music-metadata-browser';
 
 interface FileImporterProps {
   onImportComplete: () => void;
@@ -20,11 +21,7 @@ export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) 
     setIsProcessing(true);
 
     try {
-      // Group files by potential book (simple logic: all selected files belong to one book for now)
-      // In a more complex app, we'd try to parse folder structures or ID3 tags.
-      
       const fileList = Array.from(files) as File[];
-      // Expanded regex to include m4a which is common on iOS
       const audioFiles = fileList.filter(f => f.type.startsWith('audio/') || f.name.match(/\.(mp3|m4b|m4a|aac|wav|ogg)$/i)).sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
       if (audioFiles.length === 0) {
@@ -33,30 +30,56 @@ export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) 
         return;
       }
 
-      // Create Book Metadata
       const bookId = uuidv4();
-      // Use directory name if available, else first file name
-      // webkitRelativePath might be available if folder selection was used
       const firstFile = audioFiles[0] as File & { webkitRelativePath?: string };
       const dirPath = firstFile.webkitRelativePath;
       const title = dirPath ? dirPath.split('/')[0] : firstFile.name.replace(/\.[^/.]+$/, "");
+
+      const chapters: Chapter[] = [];
+      let chapterIndex = 0;
+
+      for (const file of audioFiles) {
+        if (file.name.toLowerCase().endsWith('.m4b')) {
+          try {
+            const metadata = await mm.parseBlob(file);
+            const chaptersInFile = metadata.chapters;
+            if (chaptersInFile && chaptersInFile.length > 0) {
+              for (const ch of chaptersInFile) {
+                chapters.push({
+                  id: uuidv4(),
+                  bookId: bookId,
+                  index: chapterIndex++,
+                  title: ch.title || `Chapter ${chapterIndex}`,
+                  fileName: file.name,
+                  startTime: ch.startTime,
+                  endTime: ch.endTime,
+                  fileBlob: file
+                });
+              }
+              continue;
+            }
+          } catch (e) {
+            console.error("Failed to parse m4b chapters", e);
+          }
+        }
+        
+        chapters.push({
+          id: uuidv4(),
+          bookId: bookId,
+          index: chapterIndex++,
+          title: file.name,
+          fileName: file.name,
+          fileBlob: file
+        });
+      }
 
       const newBook: Book = {
         id: bookId,
         title: title,
         addedAt: Date.now(),
         lastPlayedAt: Date.now(),
-        totalChapters: audioFiles.length,
+        totalChapters: chapters.length,
       };
-
-      const chapters: Chapter[] = audioFiles.map((file, index) => ({
-        id: uuidv4(),
-        bookId: bookId,
-        index: index,
-        title: file.name,
-        fileName: file.name,
-        fileBlob: file
-      }));
 
       await db.addBook(newBook, chapters);
       onImportComplete();
