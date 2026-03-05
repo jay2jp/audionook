@@ -4,7 +4,7 @@ import { db } from '../services/db';
 import { v4 as uuidv4 } from 'uuid';
 import { Book, Chapter } from '../types';
 import { Button } from './Button';
-import * as mm from 'music-metadata-browser';
+import * as MP4Box from 'mp4box';
 
 interface FileImporterProps {
   onImportComplete: () => void;
@@ -13,6 +13,64 @@ interface FileImporterProps {
 export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const getChaptersFromM4B = (file: File): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      const mp4boxfile = MP4Box.createFile();
+      let offset = 0;
+      const chunkSize = 1024 * 1024 * 2; // 2MB chunks
+      const reader = new FileReader();
+      let isDone = false;
+
+      mp4boxfile.onReady = (info: any) => {
+        isDone = true;
+        // Normalize chapters if timescale is present
+        const chapters = (info.chapters || []).map((ch: any) => {
+             // If timescale is available in info, use it. 
+             // info.timescale is the movie timescale.
+             // Chapter times are usually in movie timescale.
+             const timescale = info.timescale || 1;
+             return {
+                 ...ch,
+                 start_time: ch.start_time / timescale,
+                 duration: ch.duration / timescale,
+                 timescale: 1 // Normalized
+             };
+        });
+        resolve(chapters);
+      };
+
+      mp4boxfile.onError = (e: any) => {
+        isDone = true;
+        reject(e);
+      };
+
+      reader.onload = (e) => {
+        if (isDone) return;
+        const buffer = e.target?.result as ArrayBuffer;
+        (buffer as any).fileStart = offset;
+        mp4boxfile.appendBuffer(buffer as any);
+        offset += chunkSize;
+        if (offset < file.size && !isDone) {
+          readNextChunk();
+        } else {
+          mp4boxfile.flush();
+          if (!isDone) resolve([]); // If no chapters found by end
+        }
+      };
+
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+
+      const readNextChunk = () => {
+        const slice = file.slice(offset, offset + chunkSize);
+        reader.readAsArrayBuffer(slice);
+      };
+
+      readNextChunk();
+    });
+  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -39,10 +97,9 @@ export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) 
       let chapterIndex = 0;
 
       for (const file of audioFiles) {
-        if (file.name.toLowerCase().endsWith('.m4b')) {
+        if (file.name.toLowerCase().endsWith('.m4b') || file.name.toLowerCase().endsWith('.m4a')) {
           try {
-            const metadata = await mm.parseBlob(file);
-            const chaptersInFile = metadata.chapters;
+            const chaptersInFile = await getChaptersFromM4B(file);
             if (chaptersInFile && chaptersInFile.length > 0) {
               for (const ch of chaptersInFile) {
                 chapters.push({
@@ -51,8 +108,8 @@ export const FileImporter: React.FC<FileImporterProps> = ({ onImportComplete }) 
                   index: chapterIndex++,
                   title: ch.title || `Chapter ${chapterIndex}`,
                   fileName: file.name,
-                  startTime: ch.startTime,
-                  endTime: ch.endTime,
+                  startTime: ch.start_time,
+                  endTime: ch.start_time + ch.duration,
                   fileBlob: file
                 });
               }
